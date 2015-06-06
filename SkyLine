@@ -1,0 +1,18 @@
+  object SkyLine {
+
+    val data = List((2, 9, 10), (3, 7, 15), (5, 12, 12), (15, 20, 10), (19, 24, 8))
+
+    def skyLine(data: List[(Int, Int, Int)]): Seq[(Int, Int)] = {
+      val seqdata = data.toSeq.sortBy(_._1)
+      val buf = new ArrayBuffer[(Int, Int)]
+      (seqdata.head._1 to seqdata.last._2 +1).sliding(2).foreach { case Seq(x1: Int, x2: Int) => {
+        val maxheight =
+          seqdata.foldLeft(0) { case (mx:Int, (l:Int, r:Int, h:Int)) => {
+            if (l <= x1 && x2 <= r) Math.max(mx, h) else mx
+          }}
+        if (buf.isEmpty || buf.last._2 != maxheight)
+          buf.append((x1, maxheight))
+      }}
+      buf.toSeq
+    }
+  }
