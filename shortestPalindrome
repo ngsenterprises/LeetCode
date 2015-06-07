@@ -1,0 +1,20 @@
+  object shortestPalindrome {
+
+    def shortestPalindromeAug(data: String): String = {
+      if (data.length < 2) data
+      else {
+        var takeLen = data.length
+        var subdata = data.toLowerCase.splitAt(takeLen)
+        while (2 <= subdata._1.length && !isPalindrome(subdata._1)) {
+          takeLen -= 1
+          subdata = data.splitAt(takeLen)
+        }
+        subdata._2.reverse + data
+      }
+    } //------------------------------------------
+
+    def isPalindrome(data: String): Boolean = {
+      val trim = data.length / 2
+      data.take(trim).iterator.sameElements(data.drop(data.length - trim).reverseIterator)
+    }
+  }
