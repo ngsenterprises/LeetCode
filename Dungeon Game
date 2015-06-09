@@ -1,0 +1,90 @@
+  object DungeonGame {
+
+    case class BoardNode(v: Int, row: Int, col: Int) {
+      def this() = { this(0, 0, 0) }
+      override def equals(other: Any): Boolean = {
+        val o = other.asInstanceOf[BoardNode]
+        v == o.v && row == o.row && col == o.col
+      }
+    }
+
+    def initBoard(rows: Int, cols: Int, maxValue: Int): Seq[Seq[BoardNode]] = {
+      //println("initWordBoard rows " +rows.toString +", cols " +cols.toString)
+      val rnd = new scala.util.Random
+      val brd = new ArrayBuffer[Seq[BoardNode]]
+      (0 until rows).foreach { r => {
+        val row = new ArrayBuffer[BoardNode]
+        (0 until cols).foreach { c => {
+          row += new BoardNode(rnd.nextInt(maxValue) -maxValue/2, r, c)
+        }}
+        brd += row.toSeq
+      }}
+      brd.toSeq
+    } //....................................
+
+    def printBoard(board: Seq[Seq[BoardNode]]): Unit = {
+      board.foreach { row => {
+        print("[")
+        row.foreach { col => print("[" +col.v.toString  +"]") }
+        println("]")
+      }}
+    } //....................................
+
+    def printPath(path: Seq[BoardNode]): Unit = {
+      val sum = path.foldLeft(0) { (ac, node) => ac +node.v }
+      print(sum.toString +"[")
+      path.foreach { node =>
+        print("[" +node.v.toString +"," +node.col.toString +"," +node.row.toString +"]")
+      }
+      println("]")
+    } //....................................
+
+
+    def traverseBoard(board: Seq[Seq[BoardNode]]): Seq[Seq[BoardNode]] = {
+
+      def traverse(knightValue:Int, prefix: Seq[BoardNode]): Seq[Seq[BoardNode]] = {
+        //printPath(prefix)
+
+        val lastNode = prefix.last
+        if (lastNode.col == board(0).length -1 && lastNode.row == board.length -1)
+          List(prefix).toSeq
+        else {
+          val ab = new ArrayBuffer[Seq[BoardNode]]
+          if (lastNode.col < board(0).length -1) {
+            val node = board(lastNode.row)(lastNode.col +1)
+            val KV = knightValue + node.v
+            if (0 <= KV) ab ++= traverse(KV, prefix :+ node)
+            else List.empty[BoardNode].toSeq
+
+          }
+          if (lastNode.row < board.length -1) {
+            val node = board(lastNode.row +1)(lastNode.col)
+            val KV = knightValue + node.v
+            if (0 <= KV) ab ++= traverse(KV, prefix :+ node)
+            else List.empty[BoardNode].toSeq
+          }
+          ab.toSeq
+        }
+      }//......................
+
+      val knightVal = 100
+      val paths = traverse(knightVal, (board(0)(0) :: Nil).toSeq)
+
+      val maxPaths = new ListBuffer[Seq[BoardNode]]
+      var maxVal = Int.MinValue
+      paths.foreach { path => {
+        val sum = path.foldLeft(0) { case (ac:Int, node:BoardNode) => ac +node.v }
+        if (maxVal < sum) {
+          maxVal = sum
+          maxPaths.clear
+          maxPaths += path
+        } else if (maxVal == sum) maxPaths += path
+      }}
+      println("min value = " +(maxVal -knightVal +1).toString)
+      maxPaths.toSeq
+    }//-------------------------------------------
+  }
+
+  val board = DungeonGame.initBoard(10, 10, 50)
+  val ssq = DungeonGame.traverseBoard(board)
+  ssq.foreach( path => DungeonGame.printPath(path) )
