@@ -21,6 +21,6 @@
     }//...............................................
   }
 
-  val data = List(("egg","add"), ("foo","bar"), ("paper","title"))
+  val data = List(("egg","add"), ("foo","bar"), ("paper","title"), ("to", "aa"))
   data.toSeq.foreach { pair => println(pair._1 +", " +pair._2 +", "
     +IsomorphicStr.isomorphicStr(pair._1, pair._2)) }
