@@ -1,5 +1,11 @@
   object IsomorphicStrings {
 
+    def apply(): Unit = {
+      val data = List(("egg","add"), ("foo","bar"), ("paper","title"), ("to", "aa"))
+      data.toSeq.foreach { pair => println(pair._1 +", " +pair._2 +", " 
+        +IsomorphicStr.isomorphicStr(pair._1, pair._2)) }
+    }
+
     def isomorphicStr(s1: String, s2: String): Boolean = {
       if (s1.length != s2.length) false else {
         val cMap = new collection.mutable.HashMap[Char, Char]
@@ -21,6 +27,3 @@
     }//...............................................
   }
 
-  val data = List(("egg","add"), ("foo","bar"), ("paper","title"), ("to", "aa"))
-  data.toSeq.foreach { pair => println(pair._1 +", " +pair._2 +", "
-    +IsomorphicStr.isomorphicStr(pair._1, pair._2)) }
