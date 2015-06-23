@@ -1,7 +1,38 @@
   object SkyLine {
 
-    val data = List((2, 9, 10), (3, 7, 15), (5, 12, 12), (15, 20, 10), (19, 24, 8))
+    def apply(): Unit = {
+      val data = List((2, 9, 10), (3, 7, 15), (5, 12, 12), (15, 20, 10), (19, 24, 8))
+      println(skyLine2(data).toList)
 
+    }//----------------------------------------------------
+
+    def skyLine2(data: Seq[(Int, Int, Int)]): Seq[(Int, Int)] = {
+      var hm = new HashMap[Int, Int]
+      var min_x = Int.MaxValue
+      var max_x = Int.MinValue
+      data.foreach {
+        case (x1:Int, x2:Int, h:Int) => {
+          (x1 until x2).foreach { x => hm += (x -> Math.max(hm.getOrElse(x, 0), h)) }
+          hm += (x2 -> 0)
+          max_x = Math.max(x2, max_x)
+          min_x = Math.min(min_x, x1)
+        }
+      }
+
+      val buf = new ArrayBuffer[(Int, Int)]
+      buf.append((min_x, hm.getOrElse(min_x, 0)))
+      (min_x +1 to max_x).foreach { x => {
+        val h = hm.getOrElse(x, 0)
+        if (h != buf.last._2) buf.append((x, h))
+      }}
+
+      buf.toSeq
+
+    }//-------------------------------------
+
+
+
+    //deprecated
     def skyLine(data: List[(Int, Int, Int)]): Seq[(Int, Int)] = {
       val seqdata = data.toSeq.sortBy(_._1)
       val buf = new ArrayBuffer[(Int, Int)]
@@ -16,3 +47,6 @@
       buf.toSeq
     }
   }
+
+
+
