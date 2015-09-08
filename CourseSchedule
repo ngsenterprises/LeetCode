@@ -1,44 +1,54 @@
+
   object CourseSchedule {
 
     case class CourseNode(course: Int) {
-      var preReqs = Map.empty[Int, CourseNode]
+      var preReqs = scala.collection.immutable.Set.empty[Int]
+      val postElects = scala.collection.mutable.Set.empty[Int]
       override def toString: String = {
-        "course: " +course.toString +", preReqs: " +preReqs.keySet.toList
+        "course: " +course.toString +"\n preReqs: " +preReqs.toList +"\n postElects: " +postElects.toList +"\n"
       }
     }
 
     def apply(): Unit = {
-      val data = (4, Seq((1,0),(2,0),(3,1),(3,2)))
+      val data = (4, Seq((1,0),(2,1),(3,2),(0,3)))
       val data2 = (11, Seq((10,5),(5,3),(9,4),(4,2),(4,1),(4,0),(7,6),(2,9)))
-      println(courseSchedule(data2).toList.distinct)
+      val data3 = (4, Seq((2,1),(1,0),(3,1)))
+      val data4 = (6, Seq((1,0),(2,1),(3,2),(5,0),(4,1)))
+      println("res: " +courseSchedule(data4._1, data4._2).toList)
     }//.........................
 
-    def getList(node:CourseNode): List[Int] = {
-      var dep = node.course +: node.preReqs.keys.toList
-      node.preReqs.unzip._2.toSeq.foreach { nd => dep = dep ++ getList(nd) }
-      dep.distinct
-    }
+    def courseSchedule(dataSize: Int, preReqs: Seq[(Int, Int)]): Seq[Int] = {
 
-    def courseSchedule(data: (Int, Seq[(Int, Int)])): Seq[Int] = {
-      var stor = Map.empty[Int, CourseNode]
-      (0 until data._1).foreach { course =>
-        stor = stor + (course -> new CourseNode(course)) }
-      var indep = stor.keySet
-      data._2.foreach { case (c:Int, p:Int) => {
-        val crs = stor(c)
-        crs.preReqs = crs.preReqs +(p -> stor(p))
-        indep = indep -p
+      val nodeStor = new Array[CourseNode](dataSize)
+      (0 until dataSize).foreach { index => nodeStor(index) = new CourseNode(index) }
+      var termCourses = (0 until dataSize).toSet
+      preReqs.foreach { pr => {
+        nodeStor(pr._1).preReqs = nodeStor(pr._1).preReqs +pr._2
+        nodeStor(pr._2).postElects += pr._1
+        termCourses = termCourses.filter( _ != pr._2)
       }}
 
-      if (indep.isEmpty) Seq[Int]() else {
-        val rSeq =
-          indep.toList.foldLeft(List[Int]()) { (ac, crs) => {
-            stor.get(crs) match {
-              case None => ac
-              case Some(cn:CourseNode) => ac ++ getList(cn)
-            }
-          }}.distinct.toSeq
-        if (rSeq.length < data._1) Seq[Int]() else rSeq
+      val courseList = new ListBuffer[Int]
+      var terms = termCourses.filter( nodeStor( _ ).postElects.isEmpty )
+
+      while (!terms.isEmpty) {
+        terms.foreach { t => {
+          t +=: courseList
+          nodeStor(t).preReqs.foreach { index => nodeStor(index).postElects -= t }
+          termCourses ++= nodeStor(t).preReqs
+          termCourses -= t
+        }}
+        terms = termCourses.filter( nodeStor( _ ).postElects.isEmpty )
       }
-    }//..................................
-  }//end object CourseSchedule
+
+      if (!terms.isEmpty) {
+        println("ERROR1 - terminal course list: " +terms.toList)
+        List()
+      }
+      else if (courseList.length != dataSize) {
+        println("ERROR2 - final course list:  " +courseList.toList)
+        List()
+      }
+      else courseList.toList
+    }
+  }
